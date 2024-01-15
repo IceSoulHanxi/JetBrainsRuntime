@@ -49,7 +49,7 @@ volatile BOOL AwtClipboard::isClipboardViewerRegistered = FALSE;
  */
 
 void AwtClipboard::LostOwnership(JNIEnv *env) {
-    (void)::InterlockedExchange(&AwtClipboard::isOwner, FALSE); // isOwner = FALSE;
+    isOwner = FALSE;
 
     if (theCurrentClipboard != NULL) {
         env->CallVoidMethod(theCurrentClipboard, lostSelectionOwnershipMID);
@@ -96,7 +96,7 @@ void AwtClipboard::UnregisterClipboardViewer(JNIEnv *env) {
 
 // ======================== JBR-5980 Pasting from clipboard not working reliably in Windows ===========================
 volatile BOOL AwtClipboard::areOwnershipExtraChecksEnabled = FALSE;
-volatile LONG /* BOOL */ AwtClipboard::isOwner = FALSE;
+volatile BOOL AwtClipboard::isOwner = FALSE;
 jmethodID AwtClipboard::ensureNoOwnedDataMID = nullptr;
 
 void AwtClipboard::SetOwnershipExtraChecksEnabled(BOOL enabled) {
@@ -113,10 +113,7 @@ void AwtClipboard::ExtraCheckOfOwnership() {
         return;
     }
 
-    const bool isOwner =
-        // Checks the actual value of AwtClipboard::isOwner without altering it
-        (::InterlockedCompareExchange(&AwtClipboard::isOwner, TRUE, TRUE) != LONG{FALSE});
-    if (isOwner) {
+    if (isOwner == TRUE) {
         const HWND toolkitHwnd = AwtToolkit::GetInstance().GetHWnd();
 
         if (::OpenClipboard(toolkitHwnd) == 0) {

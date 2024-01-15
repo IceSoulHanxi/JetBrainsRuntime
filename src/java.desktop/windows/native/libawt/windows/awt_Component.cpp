@@ -1609,6 +1609,7 @@ LRESULT AwtComponent::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
               // the window is being activated, let's check if we still own the clipboard
               AwtClipboard::ExtraCheckOfOwnership();
           }
+          mr = mrConsume;
           break;
       case WM_MOUSEACTIVATE: {
           AwtWindow *window = GetContainer();

@@ -54,7 +54,7 @@ public:
         (void)::InterlockedExchange(&isGettingOwnership, TRUE);  // isGettingOwnership = TRUE
         VERIFY(EmptyClipboard());
         (void)::InterlockedExchange(&isGettingOwnership, FALSE); // isGettingOwnership = FALSE
-        (void)::InterlockedExchange(&isOwner, TRUE);             // isOwner = TRUE;
+        AwtClipboard::isOwner = TRUE;
     }
 
     INLINE static BOOL IsGettingOwnership() {
@@ -78,12 +78,7 @@ public:
 
 private:
     static volatile BOOL areOwnershipExtraChecksEnabled;
-    // Although the variable's type is LONG, it's supposed to be treated as BOOL,
-    //     with the only possible values TRUE and FALSE.
-    // Also, all accesses to the variable (both reading and writing) MUST be performed using
-    //     Windows Interlocked Variable Access API.
-    // LONG is only used to make sure it's safe to pass the variable to ::Interlocked*** functions.
-    static volatile LONG /* BOOL */ isOwner;
+    static volatile BOOL isOwner;
     // ================================================================================================================
 };
 
