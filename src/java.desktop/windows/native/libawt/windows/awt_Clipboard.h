@@ -35,14 +35,7 @@
 
 class AwtClipboard {
 private:
-    // This flag is set while we call EmptyClipboard to indicate to WM_DESTROYCLIPBOARD handler that
-    //     we are not losing ownership
-    // Although the variable's type is LONG, it's supposed to be treated as BOOL,
-    //     with the only possible values TRUE and FALSE.
-    // Also, all accesses to the variable (both reading and writing) MUST be performed using
-    //     Windows Interlocked Variable Access API.
-    // LONG is only used to make sure it's safe to pass the variable to ::Interlocked*** functions.
-    static volatile LONG /* BOOL */ isGettingOwnership;
+    static volatile BOOL isGettingOwnership;
     static volatile BOOL isClipboardViewerRegistered;
     static volatile jmethodID handleContentsChangedMID;
 
@@ -51,15 +44,14 @@ public:
     static jobject theCurrentClipboard;
 
     INLINE static void GetOwnership() {
-        (void)::InterlockedExchange(&isGettingOwnership, TRUE);  // isGettingOwnership = TRUE
+        AwtClipboard::isGettingOwnership = TRUE;
         VERIFY(EmptyClipboard());
-        (void)::InterlockedExchange(&isGettingOwnership, FALSE); // isGettingOwnership = FALSE
+        AwtClipboard::isGettingOwnership = FALSE;
         AwtClipboard::isOwner = TRUE;
     }
 
     INLINE static BOOL IsGettingOwnership() {
-        // Returns the actual value of isGettingOwnership without altering it
-        return ::InterlockedCompareExchange(&isGettingOwnership, TRUE, TRUE) != LONG{FALSE};
+        return isGettingOwnership;
     }
 
     static void LostOwnership(JNIEnv *env);
