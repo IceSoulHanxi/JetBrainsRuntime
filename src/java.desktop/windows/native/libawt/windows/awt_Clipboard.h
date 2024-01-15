@@ -47,7 +47,6 @@ public:
         AwtClipboard::isGettingOwnership = TRUE;
         VERIFY(EmptyClipboard());
         AwtClipboard::isGettingOwnership = FALSE;
-        AwtClipboard::isOwner = TRUE;
     }
 
     INLINE static BOOL IsGettingOwnership() {
@@ -58,20 +57,6 @@ public:
     static void WmClipboardUpdate(JNIEnv *env);
     static void RegisterClipboardViewer(JNIEnv *env, jobject jclipboard);
     static void UnregisterClipboardViewer(JNIEnv *env);
-
-    // ===================== JBR-5980 Pasting from clipboard not working reliably in Windows ==========================
-public:
-    static jmethodID ensureNoOwnedDataMID;
-
-public:
-    static void SetOwnershipExtraChecksEnabled(BOOL enabled);
-    // Checks if ownership has been lost since the last check or the last acquiring of ownership
-    static void ExtraCheckOfOwnership();
-
-private:
-    static volatile BOOL areOwnershipExtraChecksEnabled;
-    static volatile BOOL isOwner;
-    // ================================================================================================================
 };
 
 #endif /* AWT_CLIPBOARD_H */
