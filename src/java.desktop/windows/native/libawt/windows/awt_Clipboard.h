@@ -35,7 +35,7 @@
 
 class AwtClipboard {
 private:
-    static volatile BOOL isGettingOwnership;
+    static BOOL isGettingOwnership;
     static volatile BOOL isClipboardViewerRegistered;
     static volatile jmethodID handleContentsChangedMID;
 
