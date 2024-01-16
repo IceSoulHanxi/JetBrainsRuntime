@@ -552,14 +552,14 @@ ifeq ($(call isTargetOs, windows macosx), false)
       $(TOPDIR)/src/$(MODULE)/$(OPENJDK_TARGET_OS_TYPE)/native/common/awt \
       #
 
-  LIBAWT_HEADLESS_EXCLUDES := medialib wl vulkan
+  LIBAWT_HEADLESS_EXCLUDES := medialib wl vulkan cvulkan
 
   LIBAWT_HEADLESS_EXTRA_HEADER_DIRS := \
       $(LIBAWT_DEFAULT_HEADER_DIRS) \
       common/awt/debug \
       common/font \
       common/java2d/opengl \
-      common/java2d/vulkan \
+      common/java2d/cvulkan \
       #
 
   LIBAWT_HEADLESS_CFLAGS := $(CUPS_CFLAGS) $(FONTCONFIG_CFLAGS) $(X_CFLAGS) \
