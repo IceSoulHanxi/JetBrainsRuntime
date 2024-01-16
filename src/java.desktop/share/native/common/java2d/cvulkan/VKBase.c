@@ -129,7 +129,7 @@ jboolean VK_Init(jboolean verb, jint requestedDevice) {
     return VKGE_graphics_environment() != NULL;
 }
 
-const char* physicalDeviceTypeString(VkPhysicalDeviceType type)
+static const char* physicalDeviceTypeString(VkPhysicalDeviceType type)
 {
     switch (type)
     {
@@ -193,6 +193,12 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
         }
 
         geInstance = (VKGraphicsEnvironment*)malloc(sizeof(VKGraphicsEnvironment));
+        if (geInstance == NULL) {
+            J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VKGraphicsEnvironment\n")
+            vulkanLibClose();
+            return NULL;
+        }
+
         *geInstance = (VKGraphicsEnvironment) {
             NULL,
             NULL, 0,
@@ -204,10 +210,22 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
         // Get the number of extensions and layers
         vkEnumerateInstanceExtensionProperties(NULL, &geInstance->extensionsCount, NULL);
         geInstance->extensions = (VkExtensionProperties*) malloc(sizeof(VkExtensionProperties)*geInstance->extensionsCount);
+        if (geInstance->extensions == NULL) {
+            J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkExtensionProperties\n")
+            vulkanLibClose();
+            return NULL;
+        }
+
         vkEnumerateInstanceExtensionProperties(NULL, &geInstance->extensionsCount, geInstance->extensions);
 
         vkEnumerateInstanceLayerProperties(&geInstance->layersCount, NULL);
         geInstance->layers = (VkLayerProperties*) malloc(sizeof(VkLayerProperties)*geInstance->layersCount);
+        if (geInstance->layers == NULL) {
+            J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkLayerProperties\n")
+            vulkanLibClose();
+            return NULL;
+        }
+
         vkEnumerateInstanceLayerProperties(&geInstance->layersCount, geInstance->layers);
 
         J2dRlsTrace(J2D_TRACE_VERBOSE, "    Supported instance layers:\n")
@@ -335,6 +353,12 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             J2dRlsTrace1(J2D_TRACE_INFO, "Vulkan: Found %d physical devices:\n", geInstance->physicalDevicesCount)
         }
         geInstance->physicalDevices = malloc(sizeof (VkPhysicalDevice)*geInstance->physicalDevicesCount);
+        if (geInstance->physicalDevices == NULL) {
+            J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkPhysicalDevice\n")
+            vulkanLibClose();
+            return NULL;
+        }
+
         vkEnumeratePhysicalDevices(
                 geInstance->vkInstance,
                 &geInstance->physicalDevicesCount,
@@ -376,12 +400,17 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
                 (PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR) vulkanLibProc(
                         geInstance->vkInstance, "vkGetPhysicalDeviceWaylandPresentationSupportKHR");
         if(vkGetPhysicalDeviceWaylandPresentationSupportKHR == NULL) {
-            J2dRlsTrace(J2D_TRACE_ERROR, "vkGetPhysicalDeviceWaylandPresentationSupportKHR is not supported\n");
+            J2dRlsTrace(J2D_TRACE_ERROR, "vkGetPhysicalDeviceWaylandPresentationSupportKHR is not supported\n")
             vulkanLibClose();
             return NULL;
         }
 #endif
         geInstance->devices = (VKLogicalDevice *) malloc(geInstance->physicalDevicesCount*sizeof(VKLogicalDevice));
+        if (geInstance->devices == NULL) {
+            J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VKLogicalDevice\n")
+            vulkanLibClose();
+            return NULL;
+        }
         geInstance->devicesCount = 0;
         //geInstance->devicesC
         for (uint32_t i = 0; i < geInstance->physicalDevicesCount; i++) {
@@ -420,12 +449,19 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
                     geInstance->physicalDevices[i], &queueFamilyCount, NULL);
 
             VkQueueFamilyProperties *queueFamilies = malloc(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
+            if (queueFamilies == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkQueueFamilyProperties\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             vkGetPhysicalDeviceQueueFamilyProperties(
                     geInstance->physicalDevices[i], &queueFamilyCount, queueFamilies);
             int64_t queueFamily = -1;
             for (uint32_t j = 0; j < queueFamilyCount; j++) {
 #if defined(VK_USE_PLATFORM_WAYLAND_KHR)
-                VkBool32 presentationSupported = vkGetPhysicalDeviceWaylandPresentationSupportKHR(geInstance->physicalDevices[i], j, wl_display);
+                VkBool32 presentationSupported = vkGetPhysicalDeviceWaylandPresentationSupportKHR(
+                        geInstance->physicalDevices[i], j, wl_display);
 #endif
                 char logFlags[5] = {
                         queueFamilies[j].queueFlags & VK_QUEUE_GRAPHICS_BIT ? 'G' : '-',
@@ -459,6 +495,12 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             uint32_t layerCount;
             vkEnumerateDeviceLayerProperties(geInstance->physicalDevices[i], &layerCount, NULL);
             VkLayerProperties *layers = (VkLayerProperties *) malloc(layerCount * sizeof(VkLayerProperties));
+            if (layers == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkLayerProperties\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             vkEnumerateDeviceLayerProperties(geInstance->physicalDevices[i], &layerCount, layers);
             J2dRlsTrace(J2D_TRACE_VERBOSE, "    Supported device layers:\n")
             for (uint32_t j = 0; j < layerCount; j++) {
@@ -469,6 +511,12 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             vkEnumerateDeviceExtensionProperties(geInstance->physicalDevices[i], NULL, &extensionCount, NULL);
             VkExtensionProperties *extensions = (VkExtensionProperties *) malloc(
                     extensionCount * sizeof(VkExtensionProperties));
+            if (extensions == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkExtensionProperties\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             vkEnumerateDeviceExtensionProperties(geInstance->physicalDevices[i], NULL, &extensionCount, extensions);
             J2dRlsTrace(J2D_TRACE_VERBOSE, "    Supported device extensions:\n")
             VkBool32 hasSwapChain = VK_FALSE;
@@ -513,8 +561,20 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             //geInstance->devices->queueFamily = queueFamily;
             uint32_t deviceEnabledLayersCount = 0;
             char **deviceEnabledLayers = malloc(MAX_ENABLED_LAYERS * sizeof(char *));
+            if (deviceEnabledLayers == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate deviceEnabledLayers array\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             uint32_t deviceEnabledExtensionsCount = 0;
             char **deviceEnabledExtensions = malloc(MAX_ENABLED_EXTENSIONS * sizeof(char *));
+            if (deviceEnabledExtensions == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate deviceEnabledExtensions array\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             deviceEnabledExtensions[deviceEnabledExtensionsCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
             if (hasExtMemoryBudget) {
@@ -552,8 +612,13 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             geInstance->devices[geInstance->devicesCount].hasExtMemoryBudget = hasExtMemoryBudget;
             geInstance->devices[geInstance->devicesCount].hasKhrSynchronization2 = hasKhrSynchronization2;
             geInstance->devices[geInstance->devicesCount].hasKhrDynamicRendering = hasKhrDynamicRendering;
-            geInstance->devices[i].name = malloc(strlen(deviceProperties2.properties.deviceName) + 1);
-            strcpy(geInstance->devices[i].name, deviceProperties2.properties.deviceName);
+            geInstance->devices[i].name = strdup(deviceProperties2.properties.deviceName);
+            if (geInstance->devices[i].name == NULL) {
+                J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot duplicate deviceName\n")
+                vulkanLibClose();
+                return NULL;
+            }
+
             geInstance->devicesCount++;
         }
         if (geInstance->devicesCount == 0) {
