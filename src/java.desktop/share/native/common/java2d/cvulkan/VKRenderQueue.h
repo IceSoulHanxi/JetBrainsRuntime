@@ -43,7 +43,7 @@
 /*
  * Increments a pointer (buf) by the given number of bytes.
  */
-#define SKIP_BYTES(buf, numbytes) (buf) += (numbytes)
+#define SKIP_BYTES(buf, numbytes) (buf) = ((unsigned char*)buf) + (numbytes)
 
 /*
  * Extracts a value at the given offset from the provided packed value.

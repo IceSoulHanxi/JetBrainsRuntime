@@ -32,7 +32,6 @@
 #include "SurfaceData.h"
 #include "VKBase.h"
 
-typedef struct _VKSDOps VKSDOps;
 /**
  * The VKSDOps structure describes a native Vulkan surface and contains all
  * information pertaining to the native surface.  Some information about
@@ -42,7 +41,7 @@ typedef struct _VKSDOps VKSDOps;
  * Pointer to native-specific SurfaceData info, such as the
  * native Drawable handle and GraphicsConfig data.
  */
-struct _VKSDOps {
+typedef struct {
     SurfaceDataOps         sdOps;
     void                   *privOps;
 
@@ -59,7 +58,7 @@ struct _VKSDOps {
     VkPipelineStageFlagBits lastWriteStage;
     VkAccessFlagBits        lastAccess;
     VkAccessFlagBits        lastWriteAccess;
-};
+} VKSDOps;
 
 
 /**
