@@ -217,7 +217,8 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             return NULL;
         }
 
-        geInstance->extensions = (VkExtensionProperties*) malloc(sizeof(VkExtensionProperties)*geInstance->extensionsCount);
+        geInstance->extensions = (VkExtensionProperties*) calloc(geInstance->extensionsCount,
+                                                                 sizeof(VkExtensionProperties));
         if (geInstance->extensions == NULL) {
             J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkExtensionProperties\n")
             vulkanLibClose();
@@ -241,7 +242,7 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             return NULL;
         }
 
-        geInstance->layers = (VkLayerProperties*) malloc(sizeof(VkLayerProperties)*geInstance->layersCount);
+        geInstance->layers = (VkLayerProperties*) calloc(geInstance->layersCount, sizeof(VkLayerProperties));
         if (geInstance->layers == NULL) {
             J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkLayerProperties\n")
             vulkanLibClose();
@@ -387,7 +388,8 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
         } else {
             J2dRlsTrace1(J2D_TRACE_INFO, "Vulkan: Found %d physical devices:\n", geInstance->physicalDevicesCount)
         }
-        geInstance->physicalDevices = malloc(sizeof (VkPhysicalDevice)*geInstance->physicalDevicesCount);
+        geInstance->physicalDevices = calloc(geInstance->physicalDevicesCount,
+                                             sizeof (VkPhysicalDevice));
         if (geInstance->physicalDevices == NULL) {
             J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkPhysicalDevice\n")
             vulkanLibClose();
@@ -445,7 +447,8 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             return NULL;
         }
 #endif
-        geInstance->devices = (VKLogicalDevice *) malloc(geInstance->physicalDevicesCount*sizeof(VKLogicalDevice));
+        geInstance->devices = (VKLogicalDevice *) calloc(geInstance->physicalDevicesCount,
+                                                         sizeof(VKLogicalDevice));
         if (geInstance->devices == NULL) {
             J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VKLogicalDevice\n")
             vulkanLibClose();
@@ -488,7 +491,8 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             vkGetPhysicalDeviceQueueFamilyProperties(
                     geInstance->physicalDevices[i], &queueFamilyCount, NULL);
 
-            VkQueueFamilyProperties *queueFamilies = malloc(sizeof(VkQueueFamilyProperties) * queueFamilyCount);
+            VkQueueFamilyProperties *queueFamilies = (VkQueueFamilyProperties*)calloc(queueFamilyCount,
+                                                            sizeof(VkQueueFamilyProperties));
             if (queueFamilies == NULL) {
                 J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkQueueFamilyProperties\n")
                 vulkanLibClose();
@@ -534,7 +538,7 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
 
             uint32_t layerCount;
             vkEnumerateDeviceLayerProperties(geInstance->physicalDevices[i], &layerCount, NULL);
-            VkLayerProperties *layers = (VkLayerProperties *) malloc(layerCount * sizeof(VkLayerProperties));
+            VkLayerProperties *layers = (VkLayerProperties *) calloc(layerCount, sizeof(VkLayerProperties));
             if (layers == NULL) {
                 J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkLayerProperties\n")
                 vulkanLibClose();
@@ -549,8 +553,8 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
 
             uint32_t extensionCount;
             vkEnumerateDeviceExtensionProperties(geInstance->physicalDevices[i], NULL, &extensionCount, NULL);
-            VkExtensionProperties *extensions = (VkExtensionProperties *) malloc(
-                    extensionCount * sizeof(VkExtensionProperties));
+            VkExtensionProperties *extensions = (VkExtensionProperties *) calloc(
+                    extensionCount, sizeof(VkExtensionProperties));
             if (extensions == NULL) {
                 J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate VkExtensionProperties\n")
                 vulkanLibClose();
@@ -599,7 +603,7 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
 
 
             uint32_t deviceEnabledLayersCount = 0;
-            char **deviceEnabledLayers = malloc(MAX_ENABLED_LAYERS * sizeof(char *));
+            char **deviceEnabledLayers = calloc(MAX_ENABLED_LAYERS, sizeof(char *));
             if (deviceEnabledLayers == NULL) {
                 J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate deviceEnabledLayers array\n")
                 vulkanLibClose();
@@ -607,7 +611,7 @@ VKGraphicsEnvironment* VKGE_graphics_environment() {
             }
 
             uint32_t deviceEnabledExtensionsCount = 0;
-            char **deviceEnabledExtensions = malloc(MAX_ENABLED_EXTENSIONS * sizeof(char *));
+            char **deviceEnabledExtensions = calloc(MAX_ENABLED_EXTENSIONS, sizeof(char *));
             if (deviceEnabledExtensions == NULL) {
                 J2dRlsTrace(J2D_TRACE_ERROR, "Vulkan: Cannot allocate deviceEnabledExtensions array\n")
                 vulkanLibClose();
