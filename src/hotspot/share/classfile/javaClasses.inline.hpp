@@ -128,7 +128,8 @@ int java_lang_String::length(oop java_string) {
 }
 
 bool java_lang_String::is_instance(oop obj) {
-  return obj != nullptr && obj->klass() == vmClasses::String_klass();
+  return obj != nullptr && (obj->klass() == vmClasses::String_klass()
+         || (VM_EnhancedRedefineClasses::is_inside_redefinition() && obj->klass()->newest_version() == vmClasses::String_klass()));
 }
 
 // Accessors
