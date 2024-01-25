@@ -547,10 +547,6 @@ void VM_EnhancedRedefineClasses::doit() {
       log_trace(redefine, class, obsolete, metadata)("Well known class updated %s", cur->external_name());
       ciObjectFactory::set_reinitialize_vm_klasses();
       C2Compiler::set_reinitialize_vm_klasses();
-      if (cur == vmClasses::Reference_klass()) {
-        // vmClasses initializes InstanceRefKlass
-        InstanceRefKlass::update_nonstatic_oop_maps(vmClasses::Reference_klass());
-      }
     }
   }
 
@@ -655,9 +651,6 @@ void VM_EnhancedRedefineClasses::doit() {
     if (state > InstanceKlass::linked) {
       cur->set_init_state(state);
     }
-
-    // transfer reference type
-    cur->set_reference_type(old->reference_type());
   }
 
   // Update objArrayKlasses
@@ -702,7 +695,7 @@ void VM_EnhancedRedefineClasses::doit() {
     ClassUnloadingWithConcurrentMark = false;
   }
 
-  /*if (objectClosure.needs_instance_update())*/ {
+  if (objectClosure.needs_instance_update()) {
     // Do a full garbage collection to update the instance sizes accordingly
 
     log_trace(redefine, class, redefine, metadata)("Before redefinition full GC run");
@@ -1041,7 +1034,10 @@ jvmtiError VM_EnhancedRedefineClasses::load_new_class_versions_single_step(TRAPS
           return JVMTI_ERROR_NAMES_DONT_MATCH;
         }
         if (k != nullptr) {
+          SystemDictionary::remove_from_hierarchy(k);
           k->set_redefining(false);
+          k->old_version()->set_new_version(nullptr);
+          k->set_old_version(nullptr);
         }
         _affected_klasses->at_put(i, nullptr);
         continue;
@@ -1057,6 +1053,18 @@ jvmtiError VM_EnhancedRedefineClasses::load_new_class_versions_single_step(TRAPS
     InstanceKlass* new_class = k;
     the_class->set_new_version(new_class);
     _new_classes->append(new_class);
+
+    if (the_class == vmClasses::Reference_klass()) {
+      // must set offset+count to skip field "referent". Look at InstanceRefKlass::update_nonstatic_oop_maps
+      OopMapBlock* old_map = the_class->start_of_nonstatic_oop_maps();
+      OopMapBlock* new_map = new_class->start_of_nonstatic_oop_maps();
+      new_map->set_offset(old_map->offset());
+      new_map->set_count(old_map->count());
+    }
+
+    if (new_class->reference_type() != REF_NONE) {
+      assert(new_class->start_of_nonstatic_oop_maps()->offset() == the_class->start_of_nonstatic_oop_maps()->offset(), "oops map offset must be same");
+    }
 
     int redefinition_flags = Klass::NoRedefinition;
     if (not_changed) {
@@ -1492,7 +1500,8 @@ void VM_EnhancedRedefineClasses::calculate_instance_update_information(Klass* ne
         const InjectedField* const injected = JavaClasses::get_injected(old_klass->name(), &num_injected);
         for (int i = java_fields_count; i < java_fields_count+num_injected; i++) {
           FieldInfo old_field = old_klass->field(i);
-          if (old_field.field_flags().is_injected() && old_field.name(nullptr) == internal_field.name(nullptr)) {
+          if (old_field.field_flags().is_injected() &&
+              old_field.lookup_symbol(old_field.name_index()) == internal_field.lookup_symbol(internal_field.name_index())) {
             copy(old_field.offset(), type2aelembytes(Signature::basic_type(internal_field.signature(nullptr))));
             if (old_field.offset() < internal_field.offset()) {
               _copy_backwards = true;
@@ -2043,12 +2052,11 @@ void VM_EnhancedRedefineClasses::compute_added_deleted_matching_methods() {
 //      a helper method to be specified. The interesting parameters
 //      that we would like to pass to the helper method are saved in
 //      static global fields in the VM operation.
-void VM_EnhancedRedefineClasses::redefine_single_class(Thread *current, InstanceKlass* new_class_oop) {
+void VM_EnhancedRedefineClasses::redefine_single_class(Thread *current, InstanceKlass* new_class) {
 
   HandleMark hm(current);   // make sure handles from this call are freed
 
-  InstanceKlass* new_class = new_class_oop;
-  InstanceKlass* the_class = InstanceKlass::cast(new_class_oop->old_version());
+  InstanceKlass* the_class = InstanceKlass::cast(new_class->old_version());
   assert(the_class != nullptr, "must have old version");
 
   // Remove all breakpoints in methods of this class
