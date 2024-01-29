@@ -3999,6 +3999,7 @@ jint Arguments::parse(const JavaVMInitArgs* initial_cmd_args) {
 
   if (AllowEnhancedClassRedefinition) {
     ClassUnloading = false;
+    ClassUnloadingWithConcurrentMark = false;
   }
 
 #if !INCLUDE_CDS
