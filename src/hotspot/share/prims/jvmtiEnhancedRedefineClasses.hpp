@@ -203,8 +203,6 @@ class VM_EnhancedRedefineClasses: public VM_GC_Operation {
   // and redefine implementation
   static bool is_modifiable_class(oop klass_mirror);
   // true if is inside VM redefinition phase
-  static bool is_inside_redefinition() {
-    return _is_inside_redefinition;
-  }
+  static bool is_inside_redefinition();
 };
 #endif // SHARE_VM_PRIMS_JVMTIREDEFINECLASSES2_HPP

@@ -116,6 +116,10 @@ static inline InstanceKlass* get_ik(jclass def) {
   return InstanceKlass::cast(java_lang_Class::as_Klass(mirror));
 }
 
+bool VM_EnhancedRedefineClasses::is_inside_redefinition() {
+  return _is_inside_redefinition;
+}
+
 // Start the redefinition:
 // - Load new class definitions - @see load_new_class_versions
 // - Start mark&sweep GC.
