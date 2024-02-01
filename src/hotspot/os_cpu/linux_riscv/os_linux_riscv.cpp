@@ -370,6 +370,25 @@ void os::print_tos_pc(outputStream *st, const void *context) {
   st->cr();
 }
 
+void os::print_tos_pc(outputStream *st, const void *context) {
+  if (context == NULL) return;
+
+  const ucontext_t* uc = (const ucontext_t*)context;
+
+  intptr_t *sp = (intptr_t *)os::Linux::ucontext_get_sp(uc);
+  st->print_cr("Top of Stack: (sp=" PTR_FORMAT ")", p2i(sp));
+  print_hex_dump(st, (address)(sp - 32), (address)(sp + 32), sizeof(intptr_t));
+  st->cr();
+
+  // Note: it may be unsafe to inspect memory near pc. For example, pc may
+  // point to garbage if entry point in an nmethod is corrupted. Leave
+  // this at the end, and hope for the best.
+  address pc = os::Posix::ucontext_get_pc(uc);
+  st->print_cr("Instructions: (pc=" PTR_FORMAT ")", p2i(pc));
+  print_hex_dump(st, pc - 64, pc + 64, sizeof(char));
+  Disassembler::decode(pc - 80, pc + 80, st);
+}
+
 void os::print_register_info(outputStream *st, const void *context) {
   if (context == NULL) return;
 
