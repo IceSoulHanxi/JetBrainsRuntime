@@ -51,7 +51,6 @@ public enum Architecture {
      */
     AARCH64(64, ByteOrder.LITTLE_ENDIAN),
     ARM(32, ByteOrder.LITTLE_ENDIAN),
-    LOONGARCH64(64, ByteOrder.LITTLE_ENDIAN),
     MIPSEL(32, ByteOrder.LITTLE_ENDIAN),
     MIPS64EL(64, ByteOrder.LITTLE_ENDIAN),
     OTHER(is64bit() ? 64 : 32, ByteOrder.nativeOrder()),
