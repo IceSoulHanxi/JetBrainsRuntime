@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * This file has been modified by Loongson Technology in 2022, These
+ * modifications are Copyright (c) 2021, 2022, Loongson Technology, and are made
+ * available on the same license terms set forth above.
+ */
+
 // common infrastructure for SunPKCS11 tests
 
 import java.io.ByteArrayOutputStream;
@@ -759,6 +765,9 @@ public abstract class PKCS11Test {
                 } else {
                     return fetchNssLib(LINUX_AARCH64.class);
                 }
+
+            case: "Linux-loongarch64-64":
+                return fetchNssLib(LINUX_LOONGARCH64.class);
             default:
                 return null;
         }
@@ -909,5 +918,14 @@ public abstract class PKCS11Test {
             extension = "zip"
     )
     private static class LINUX_AARCH64{
+    }
+
+    @Artifact(
+            organization = NSSLIB,
+            name = "nsslib-linux_loongarch64",
+            revision = NSS_BUNDLE_VERSION,
+            extension = "zip"
+    )
+    private static class LINUX_LOONGARCH64{
     }
 }

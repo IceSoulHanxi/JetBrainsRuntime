@@ -22,19 +22,25 @@
  *
  */
 
+/*
+ * This file has been modified by Loongson Technology in 2022, These
+ * modifications are Copyright (c) 2022, Loongson Technology, and are made
+ * available on the same license terms set forth above.
+ */
+
 /**
  * @test id=C1
  * @bug 8280481
  * @summary Checks that stubs to the interpreter can be shared for static or final method.
  * @library /test/lib
  * @requires vm.opt.TieredStopAtLevel == null & vm.opt.TieredCompilation == null
- * @requires vm.simpleArch == "x86" | vm.simpleArch == "x64" | vm.simpleArch == "aarch64" | vm.simpleArch == "riscv64"
+ * @requires vm.simpleArch == "x86" | vm.simpleArch == "x64" | vm.simpleArch == "aarch64" | vm.simpleArch == "riscv64" | os.arch=="loongarch64"
  * @requires vm.debug
  * @run driver compiler.sharedstubs.SharedStubToInterpTest -XX:TieredStopAtLevel=1
  *
  * @test id=C2
  * @requires vm.opt.TieredStopAtLevel == null & vm.opt.TieredCompilation == null
- * @requires vm.simpleArch == "x86" | vm.simpleArch == "x64" | vm.simpleArch == "aarch64" | vm.simpleArch == "riscv64"
+ * @requires vm.simpleArch == "x86" | vm.simpleArch == "x64" | vm.simpleArch == "aarch64" | vm.simpleArch == "riscv64" | os.arch=="loongarch64"
  * @requires vm.debug
  * @run driver compiler.sharedstubs.SharedStubToInterpTest -XX:-TieredCompilation
  *

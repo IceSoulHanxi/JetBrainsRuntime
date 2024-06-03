@@ -20,6 +20,14 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * This file has been modified by Loongson Technology in 2023. These
+ * modifications are Copyright (c) 2023, Loongson Technology, and are made
+ * available on the same license terms set forth above.
+ *
+ */
+
 import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Locale;
@@ -37,6 +45,7 @@ import static jdk.internal.util.Architecture.PPC;
 import static jdk.internal.util.Architecture.PPC64;
 import static jdk.internal.util.Architecture.PPC64LE;
 import static jdk.internal.util.Architecture.RISCV64;
+import static jdk.internal.util.Architecture.LOONGARCH64;
 import static jdk.internal.util.Architecture.S390;
 import static jdk.internal.util.Architecture.SPARCV9;
 import static jdk.internal.util.Architecture.X64;
@@ -86,6 +95,7 @@ public class ArchTest {
                 Arguments.of("ppc64", PPC64, 64, ByteOrder.BIG_ENDIAN, Architecture.isPPC64()),
                 Arguments.of("ppc64le", PPC64LE, 64, ByteOrder.LITTLE_ENDIAN, Architecture.isPPC64LE()),
                 Arguments.of("riscv64", RISCV64, 64, ByteOrder.LITTLE_ENDIAN, Architecture.isRISCV64()),
+                Arguments.of("loongarch64", LOONGARCH64, 64, ByteOrder.LITTLE_ENDIAN, Architecture.isLOONGARCH64()),
                 Arguments.of("s390", S390, 64, ByteOrder.BIG_ENDIAN, Architecture.isS390()),
                 Arguments.of("s390x", S390, 64, ByteOrder.BIG_ENDIAN, Architecture.isS390()),
                 Arguments.of("sparcv9", SPARCV9, 64, ByteOrder.BIG_ENDIAN, Architecture.isSPARCV9()),
